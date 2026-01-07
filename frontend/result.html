@@ -1,0 +1,421 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>SHAND — Results (redirect)</title>
+  <meta http-equiv="refresh" content="2;url=analysis.html">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <style>
+    :root {
+      --bg-main: #0a0a0a;
+      --bg-card: #111111;
+      --bg-card-hover: #1a1a1a;
+      --text-primary: #ffffff;
+      --text-secondary: #a0a0a0;
+      --text-tertiary: #666666;
+      --border-light: #222222;
+      --border-medium: #333333;
+      --accent-primary: #00d4ff;
+      --accent-primary-hover: #00b8e0;
+      --accent-secondary: #8b5cf6;
+      --gradient-primary: linear-gradient(135deg, #00d4ff 0%, #8b5cf6 100%);
+      --gradient-secondary: linear-gradient(135deg, #8b5cf6 0%, #ec4899 100%);
+      --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.8);
+      --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.6);
+      --shadow-lg: 0 20px 40px rgba(0, 0, 0, 0.4);
+      --radius-sm: 8px;
+      --radius-md: 12px;
+      --radius-lg: 16px;
+      --radius-xl: 24px;
+      --radius-full: 999px;
+    }
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    html {
+      background: var(--bg-main);
+    }
+
+    body {
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      background: var(--bg-main);
+      color: var(--text-primary);
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      -webkit-font-smoothing: antialiased;
+      -moz-osx-font-smoothing: grayscale;
+      position: relative;
+      overflow: hidden;
+    }
+
+    /* Animated Background */
+    .floating-shapes {
+      position: absolute;
+      width: 100%;
+      height: 100%;
+      top: 0;
+      left: 0;
+      z-index: -1;
+      overflow: hidden;
+    }
+
+    .shape {
+      position: absolute;
+      border-radius: 50%;
+      opacity: 0.1;
+      filter: blur(40px);
+    }
+
+    .shape-1 {
+      width: 300px;
+      height: 300px;
+      background: var(--accent-primary);
+      top: -100px;
+      right: 10%;
+      animation: float 20s infinite ease-in-out;
+    }
+
+    .shape-2 {
+      width: 200px;
+      height: 200px;
+      background: var(--accent-secondary);
+      bottom: 0;
+      left: 10%;
+      animation: float 25s infinite ease-in-out reverse;
+    }
+
+    @keyframes float {
+      0%, 100% { transform: translateY(0) translateX(0); }
+      33% { transform: translateY(-20px) translateX(20px); }
+      66% { transform: translateY(20px) translateX(-10px); }
+    }
+
+    /* Main Content */
+    main {
+      max-width: 600px;
+      margin: 40px auto;
+      padding: 40px;
+      text-align: center;
+      position: relative;
+      z-index: 1;
+    }
+
+    .logo-badge {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      background: rgba(255, 255, 255, 0.05);
+      backdrop-filter: blur(10px);
+      color: var(--accent-primary);
+      font-weight: 600;
+      font-size: 13px;
+      padding: 8px 20px;
+      border-radius: var(--radius-full);
+      margin-bottom: 32px;
+      letter-spacing: 1px;
+      text-transform: uppercase;
+      border: 1px solid rgba(0, 212, 255, 0.2);
+    }
+
+    h1 {
+      font-size: 48px;
+      font-weight: 800;
+      margin-bottom: 24px;
+      line-height: 1.1;
+      font-family: 'Space Grotesk', sans-serif;
+      background: linear-gradient(to right, #ffffff, var(--accent-primary));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    .redirect-subtitle {
+      font-size: 20px;
+      color: var(--text-secondary);
+      margin-bottom: 40px;
+      line-height: 1.7;
+    }
+
+    /* Progress Animation */
+    .progress-container {
+      width: 100%;
+      height: 8px;
+      background: rgba(255, 255, 255, 0.05);
+      border-radius: var(--radius-full);
+      margin: 40px 0;
+      overflow: hidden;
+      position: relative;
+    }
+
+    .progress-bar {
+      width: 100%;
+      height: 100%;
+      background: var(--gradient-primary);
+      border-radius: var(--radius-full);
+      transform: translateX(-100%);
+      animation: progress 2s ease-out forwards;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .progress-bar::after {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
+      animation: shimmer 1.5s infinite;
+    }
+
+    @keyframes progress {
+      0% { transform: translateX(-100%); }
+      100% { transform: translateX(0); }
+    }
+
+    @keyframes shimmer {
+      0% { transform: translateX(-100%); }
+      100% { transform: translateX(100%); }
+    }
+
+    /* Status Message */
+    .status-message {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 16px;
+      margin-bottom: 32px;
+      padding: 20px;
+      background: rgba(255, 255, 255, 0.03);
+      border-radius: var(--radius-lg);
+      border: 1px solid rgba(0, 212, 255, 0.1);
+    }
+
+    .status-icon {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 48px;
+      height: 48px;
+      background: rgba(0, 212, 255, 0.1);
+      border-radius: var(--radius-md);
+      color: var(--accent-primary);
+      font-size: 24px;
+      animation: pulse 2s infinite;
+    }
+
+    @keyframes pulse {
+      0%, 100% { transform: scale(1); }
+      50% { transform: scale(1.1); }
+    }
+
+    .status-text {
+      text-align: left;
+    }
+
+    .status-title {
+      font-size: 18px;
+      font-weight: 600;
+      color: var(--text-primary);
+      margin-bottom: 4px;
+    }
+
+    .status-detail {
+      font-size: 14px;
+      color: var(--text-secondary);
+    }
+
+    /* Redirect Link */
+    .redirect-link {
+      display: inline-flex;
+      align-items: center;
+      gap: 12px;
+      margin-top: 24px;
+      padding: 16px 32px;
+      background: rgba(0, 212, 255, 0.1);
+      color: var(--accent-primary);
+      border-radius: var(--radius-md);
+      text-decoration: none;
+      font-weight: 600;
+      font-size: 16px;
+      transition: all 0.3s ease;
+      border: 1px solid rgba(0, 212, 255, 0.2);
+    }
+
+    .redirect-link:hover {
+      background: var(--accent-primary);
+      color: #000;
+      transform: translateY(-2px);
+      box-shadow: 0 8px 24px rgba(0, 212, 255, 0.3);
+    }
+
+    .redirect-link i {
+      transition: transform 0.3s ease;
+    }
+
+    .redirect-link:hover i {
+      transform: translateX(4px);
+    }
+
+    /* Countdown Timer */
+    .countdown {
+      font-size: 14px;
+      color: var(--text-tertiary);
+      margin-top: 24px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+    }
+
+    .countdown-number {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 32px;
+      height: 32px;
+      background: rgba(255, 255, 255, 0.05);
+      border-radius: var(--radius-sm);
+      font-weight: 600;
+      color: var(--accent-primary);
+    }
+
+    /* Responsive Design */
+    @media (max-width: 768px) {
+      main {
+        padding: 32px 24px;
+      }
+      
+      h1 {
+        font-size: 38px;
+      }
+      
+      .redirect-subtitle {
+        font-size: 18px;
+      }
+      
+      .status-message {
+        flex-direction: column;
+        text-align: center;
+      }
+      
+      .status-text {
+        text-align: center;
+      }
+    }
+
+    @media (max-width: 480px) {
+      h1 {
+        font-size: 32px;
+      }
+      
+      .redirect-subtitle {
+        font-size: 17px;
+      }
+      
+      .logo-badge {
+        font-size: 12px;
+        padding: 6px 16px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="floating-shapes">
+    <div class="shape shape-1"></div>
+    <div class="shape shape-2"></div>
+  </div>
+  
+  <main>
+    <div class="logo-badge">
+      <i class="fas fa-redo" style="margin-right: 8px;"></i>
+      REDIRECTING
+    </div>
+    
+    <h1>Processing Complete</h1>
+    <p class="redirect-subtitle">Your analysis is ready. Redirecting to detailed results...</p>
+    
+    <div class="status-message">
+      <div class="status-icon">
+        <i class="fas fa-rocket"></i>
+      </div>
+      <div class="status-text">
+        <div class="status-title">Analysis Processed Successfully</div>
+        <div class="status-detail">Assumptions detected and categorized. Ready for review.</div>
+      </div>
+    </div>
+    
+    <div class="progress-container">
+      <div class="progress-bar"></div>
+    </div>
+    
+    <div class="countdown">
+      <i class="fas fa-clock"></i>
+      Redirecting in <span class="countdown-number" id="countdown">2</span> seconds
+    </div>
+    
+    <a href="analysis.html" class="redirect-link">
+      <i class="fas fa-external-link-alt"></i>
+      View Results Now
+    </a>
+  </main>
+  
+  <script>
+    document.addEventListener('DOMContentLoaded', function() {
+      // Update countdown timer
+      let seconds = 2;
+      const countdownElement = document.getElementById('countdown');
+      const countdownInterval = setInterval(() => {
+        seconds--;
+        if (countdownElement) {
+          countdownElement.textContent = seconds;
+        }
+        if (seconds <= 0) {
+          clearInterval(countdownInterval);
+        }
+      }, 1000);
+      
+      // Add a subtle animation to the page elements
+      const elements = document.querySelectorAll('h1, .redirect-subtitle, .status-message, .progress-container, .redirect-link');
+      elements.forEach((element, index) => {
+        element.style.opacity = '0';
+        element.style.transform = 'translateY(20px)';
+        
+        setTimeout(() => {
+          element.style.transition = 'opacity 0.5s ease, transform 0.5s ease';
+          element.style.opacity = '1';
+          element.style.transform = 'translateY(0)';
+        }, index * 100);
+      });
+      
+      // Simulate processing steps for visual feedback
+      const statusIcon = document.querySelector('.status-icon i');
+      if (statusIcon) {
+        const icons = ['fa-rocket', 'fa-search', 'fa-chart-bar', 'fa-check-circle'];
+        let currentIcon = 0;
+        
+        const iconInterval = setInterval(() => {
+          statusIcon.className = `fas ${icons[currentIcon]}`;
+          currentIcon = (currentIcon + 1) % icons.length;
+        }, 500);
+        
+        // Clear the interval when redirecting
+        setTimeout(() => {
+          clearInterval(iconInterval);
+        }, 1900);
+      }
+    });
+  </script>
+</body>
+</html>
