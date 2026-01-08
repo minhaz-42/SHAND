@@ -96,11 +96,11 @@ Return ONLY this JSON format (no markdown or extra text):
                 "prompt": prompt,
                 "stream": False,
                 "temperature": 0.5,
-                "num_ctx": 2048,
+                "num_ctx": 1024,
                 "top_p": 0.9,
                 "top_k": 40,
             },
-            timeout=180  # Give LLM time to think (3 minutes)
+            timeout=600  # 10 minutes for very large texts
         )
         
         if response.status_code != 200:

@@ -721,6 +721,8 @@
       <nav class="nav-links">
         <a href="landing.html" class="nav-link">Home</a>
         <a href="index.html" class="nav-link">Analyzer</a>
+        <a href="all-analysis.html" class="nav-link">All Analysis</a>
+        <a href="hallucination-dashboard.html" class="nav-link" style="color:#00d4ff;font-weight:700;">Hallucination Dashboard</a>
         <a href="about.html" class="nav-link">About</a>
       </nav>
       <button class="mobile-menu-btn">
@@ -912,20 +914,39 @@
           card.className = 'assumption-card';
           card.dataset.risk = assumption.risk.toLowerCase();
           card.dataset.type = assumption.type;
-          
+
+          // Hallucination signals
+          let signalsHtml = '';
+          if (assumption.signals) {
+            if (assumption.signals.unsupported) {
+              signalsHtml += `<span class="risk-badge medium" title="Low Support Claim">🟡 Low Support Claim</span> `;
+            }
+            if (assumption.signals.assumption_leak) {
+              signalsHtml += `<span class="risk-badge medium" title="Weak Evidence">🟠 Weak Evidence</span> `;
+            }
+            if (assumption.signals.contradiction) {
+              signalsHtml += `<span class="risk-badge high" title="Contradiction">🔴 Contradiction</span> `;
+            }
+          }
+
           card.innerHTML = `
             <div class="assumption-header">
-              <div class="assumption-id">Assumption #${assumption.id}</div>
-              <div class="risk-badge ${assumption.risk.toLowerCase()}">${assumption.risk} Risk</div>
+              <div class="assumption-id">Claim #${escapeHtml(assumption.claim_id || assumption.id)}</div>
+              <div>${signalsHtml || `<span class='risk-badge low'>No Issues</span>`}</div>
             </div>
-            
+
             <div class="assumption-text">"${escapeHtml(assumption.text)}"</div>
-            
+
             <div class="assumption-meta">
               <div class="meta-item">
                 <i class="fas fa-tag meta-icon"></i>
-                <span class="meta-label">Type:</span>
-                <span class="meta-value">${escapeHtml(assumption.type)}</span>
+                <span class="meta-label">Confidence:</span>
+                <span class="meta-value">${escapeHtml(assumption.confidence || 'N/A')}</span>
+              </div>
+              <div class="meta-item">
+                <i class="fas fa-link meta-icon"></i>
+                <span class="meta-label">Support Type:</span>
+                <span class="meta-value">${escapeHtml(assumption.support?.type || 'none')}</span>
               </div>
               <div class="meta-item">
                 <i class="fas fa-calendar meta-icon"></i>
@@ -933,24 +954,22 @@
                 <span class="meta-value">Just now</span>
               </div>
             </div>
-            
+
             <button class="expander-btn" aria-expanded="false">
-              <span>View Detailed Analysis</span>
+              <span>View Support Details</span>
               <i class="fas fa-chevron-down"></i>
             </button>
-            
+
             <div class="expander-content">
               <div class="reason-grid">
                 <div class="reason-card">
-                  <h4><i class="fas fa-question-circle"></i> Why This Is an Assumption</h4>
-                  <p>${escapeHtml(assumption.reason || 'No reason provided.')}</p>
+                  <h4><i class="fas fa-question-circle"></i> Support Details</h4>
+                  <p>${escapeHtml(assumption.support?.details || 'No support details provided.')}</p>
                 </div>
-                
                 <div class="reason-card">
-                  <h4><i class="fas fa-exclamation-triangle"></i> What Breaks If It Fails</h4>
-                  <p>${escapeHtml(assumption.what_breaks || 'Not specified.')}</p>
+                  <h4><i class="fas fa-exclamation-triangle"></i> Reasoning</h4>
+                  <p>${escapeHtml(assumption.reason || 'No reasoning provided.')}</p>
                 </div>
-                
                 <div class="reason-card">
                   <h4><i class="fas fa-chart-line"></i> Risk Justification</h4>
                   <p>${escapeHtml(assumption.risk_justification || 'No justification provided.')}</p>
@@ -958,17 +977,17 @@
               </div>
             </div>
           `;
-          
+
           // Add expander functionality
           const expanderBtn = card.querySelector('.expander-btn');
           const expanderContent = card.querySelector('.expander-content');
-          
+
           expanderBtn.addEventListener('click', function() {
             const isExpanded = this.getAttribute('aria-expanded') === 'true';
             this.setAttribute('aria-expanded', !isExpanded);
             expanderContent.classList.toggle('show', !isExpanded);
           });
-          
+
           fragment.appendChild(card);
         });
         

@@ -1,0 +1,760 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>SHAND — Analysis History</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <style>
+    :root {
+      --bg-main: #0a0a0a;
+      --bg-card: #111111;
+      --bg-card-hover: #1a1a1a;
+      --text-primary: #ffffff;
+      --text-secondary: #a0a0a0;
+      --text-tertiary: #666666;
+      --border-light: #222222;
+      --border-medium: #333333;
+      --accent-primary: #00d4ff;
+      --accent-primary-hover: #00b8e0;
+      --accent-secondary: #8b5cf6;
+      --accent-tertiary: #10b981;
+      --risk-low: #10b981;
+      --risk-low-bg: rgba(16, 185, 129, 0.1);
+      --risk-medium: #f59e0b;
+      --risk-medium-bg: rgba(245, 158, 11, 0.1);
+      --risk-high: #ef4444;
+      --risk-high-bg: rgba(239, 68, 68, 0.1);
+      --gradient-primary: linear-gradient(135deg, #00d4ff 0%, #8b5cf6 100%);
+      --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.8);
+      --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.6);
+      --shadow-lg: 0 20px 40px rgba(0, 0, 0, 0.4);
+      --shadow-glow: 0 0 40px rgba(0, 212, 255, 0.2);
+      --radius-sm: 8px;
+      --radius-md: 12px;
+      --radius-lg: 16px;
+    }
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    html {
+      background: var(--bg-main);
+      scroll-behavior: smooth;
+    }
+
+    body {
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      line-height: 1.6;
+      color: var(--text-primary);
+      background: var(--bg-main);
+      -webkit-font-smoothing: antialiased;
+      -moz-osx-font-smoothing: grayscale;
+      overflow-x: hidden;
+    }
+
+    main {
+      max-width: 1400px;
+      margin: 0 auto;
+      padding: 100px 24px 100px;
+    }
+
+    /* Header / Navigation */
+    .site-header {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      z-index: 1000;
+      padding: 20px 0;
+      background: rgba(10, 10, 10, 0.85);
+      backdrop-filter: blur(10px);
+      border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+    }
+
+    .nav-container {
+      max-width: 1400px;
+      margin: 0 auto;
+      padding: 0 24px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .logo {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      font-family: 'Space Grotesk', sans-serif;
+      font-weight: 700;
+      font-size: 24px;
+      color: var(--text-primary);
+      text-decoration: none;
+    }
+
+    .logo-icon {
+      font-size: 28px;
+      background: var(--gradient-primary);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    .nav-links {
+      display: flex;
+      gap: 40px;
+      align-items: center;
+    }
+
+    .nav-link {
+      color: var(--text-secondary);
+      text-decoration: none;
+      font-weight: 500;
+      font-size: 15px;
+      transition: color 0.3s ease;
+      position: relative;
+    }
+
+    .nav-link:hover,
+    .nav-link.active {
+      color: var(--accent-primary);
+    }
+
+    .nav-link.active::after {
+      content: '';
+      position: absolute;
+      bottom: -8px;
+      left: 0;
+      width: 100%;
+      height: 2px;
+      background: var(--accent-primary);
+      border-radius: 1px;
+    }
+
+    .mobile-menu-btn {
+      display: none;
+      background: none;
+      border: none;
+      color: var(--text-primary);
+      font-size: 24px;
+      cursor: pointer;
+    }
+
+    /* Page Header */
+    .page-header {
+      margin-bottom: 60px;
+    }
+
+    .page-title {
+      font-family: 'Space Grotesk', sans-serif;
+      font-size: 48px;
+      font-weight: 700;
+      margin-bottom: 16px;
+      background: var(--gradient-primary);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    .page-subtitle {
+      font-size: 18px;
+      color: var(--text-secondary);
+      max-width: 700px;
+    }
+
+    /* Filters and Controls */
+    .controls-section {
+      display: flex;
+      gap: 24px;
+      margin-bottom: 40px;
+      flex-wrap: wrap;
+      align-items: center;
+    }
+
+    .search-box {
+      flex: 1;
+      min-width: 250px;
+      position: relative;
+    }
+
+    .search-box input {
+      width: 100%;
+      padding: 12px 16px 12px 40px;
+      background: var(--bg-card);
+      border: 1px solid var(--border-light);
+      border-radius: var(--radius-md);
+      color: var(--text-primary);
+      font-size: 15px;
+      transition: all 0.3s ease;
+    }
+
+    .search-box input:focus {
+      outline: none;
+      border-color: var(--accent-primary);
+      background: rgba(255, 255, 255, 0.05);
+    }
+
+    .search-box i {
+      position: absolute;
+      left: 14px;
+      top: 50%;
+      transform: translateY(-50%);
+      color: var(--text-secondary);
+      font-size: 16px;
+    }
+
+    .filter-group {
+      display: flex;
+      gap: 12px;
+    }
+
+    .filter-btn {
+      padding: 10px 16px;
+      background: var(--bg-card);
+      border: 1px solid var(--border-light);
+      border-radius: var(--radius-full);
+      color: var(--text-secondary);
+      cursor: pointer;
+      font-size: 14px;
+      font-weight: 500;
+      transition: all 0.3s ease;
+    }
+
+    .filter-btn:hover {
+      border-color: var(--accent-primary);
+      color: var(--accent-primary);
+    }
+
+    .filter-btn.active {
+      background: var(--accent-primary);
+      color: black;
+      border-color: var(--accent-primary);
+    }
+
+    /* Analysis List */
+    .analysis-list {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+      gap: 24px;
+      margin-bottom: 60px;
+    }
+
+    .analysis-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border-light);
+      border-radius: var(--radius-lg);
+      padding: 24px;
+      transition: all 0.3s ease;
+      cursor: pointer;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .analysis-card::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 3px;
+      background: var(--accent-primary);
+      transform: scaleX(0);
+      transform-origin: left;
+      transition: transform 0.3s ease;
+    }
+
+    .analysis-card:hover {
+      background: var(--bg-card-hover);
+      border-color: var(--accent-primary);
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
+      transform: translateY(-4px);
+    }
+
+    .analysis-card:hover::before {
+      transform: scaleX(1);
+    }
+
+    .analysis-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: start;
+      margin-bottom: 16px;
+    }
+
+    .analysis-id {
+      font-family: 'Space Grotesk', sans-serif;
+      font-size: 16px;
+      font-weight: 700;
+      color: var(--accent-primary);
+    }
+
+    .analysis-status {
+      padding: 6px 12px;
+      border-radius: var(--radius-full);
+      font-size: 12px;
+      font-weight: 600;
+      background: rgba(0, 212, 255, 0.1);
+      color: var(--accent-primary);
+    }
+
+    .analysis-status.completed {
+      background: rgba(16, 185, 129, 0.1);
+      color: var(--risk-low);
+    }
+
+    .analysis-status.failed {
+      background: rgba(239, 68, 68, 0.1);
+      color: var(--risk-high);
+    }
+
+    .analysis-meta {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 16px;
+      margin-bottom: 16px;
+      padding-bottom: 16px;
+      border-bottom: 1px solid var(--border-light);
+    }
+
+    .meta-item {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+
+    .meta-label {
+      font-size: 12px;
+      color: var(--text-secondary);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .meta-value {
+      font-size: 16px;
+      font-weight: 600;
+      color: var(--text-primary);
+    }
+
+    .risk-summary {
+      display: flex;
+      gap: 12px;
+      margin-bottom: 16px;
+    }
+
+    .risk-item {
+      flex: 1;
+      padding: 12px;
+      background: rgba(255, 255, 255, 0.05);
+      border-radius: var(--radius-md);
+      text-align: center;
+    }
+
+    .risk-count {
+      font-size: 20px;
+      font-weight: 700;
+      display: block;
+    }
+
+    .risk-label {
+      font-size: 12px;
+      color: var(--text-secondary);
+      margin-top: 4px;
+    }
+
+    .risk-item.high .risk-count {
+      color: var(--risk-high);
+    }
+
+    .risk-item.medium .risk-count {
+      color: var(--risk-medium);
+    }
+
+    .risk-item.low .risk-count {
+      color: var(--risk-low);
+    }
+
+    .analysis-text-preview {
+      font-size: 14px;
+      color: var(--text-secondary);
+      line-height: 1.5;
+      margin-bottom: 16px;
+      max-height: 80px;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      display: -webkit-box;
+      -webkit-line-clamp: 3;
+      line-clamp: 3;
+      -webkit-box-orient: vertical;
+    }
+
+    .analysis-footer {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .analysis-date {
+      font-size: 13px;
+      color: var(--text-tertiary);
+    }
+
+    .view-btn {
+      padding: 8px 16px;
+      background: rgba(0, 212, 255, 0.1);
+      border: 1px solid var(--accent-primary);
+      border-radius: var(--radius-md);
+      color: var(--accent-primary);
+      font-size: 14px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      text-decoration: none;
+      display: inline-block;
+    }
+
+    .view-btn:hover {
+      background: var(--accent-primary);
+      color: black;
+    }
+
+    /* Empty State */
+    .empty-state {
+      text-align: center;
+      padding: 100px 40px;
+      background: var(--bg-card);
+      border-radius: var(--radius-lg);
+      border: 1px solid var(--border-light);
+    }
+
+    .empty-icon {
+      font-size: 64px;
+      color: var(--text-tertiary);
+      margin-bottom: 24px;
+    }
+
+    .empty-title {
+      font-size: 28px;
+      font-weight: 700;
+      color: var(--text-primary);
+      margin-bottom: 12px;
+    }
+
+    .empty-text {
+      font-size: 16px;
+      color: var(--text-secondary);
+      margin-bottom: 32px;
+      max-width: 500px;
+      margin-left: auto;
+      margin-right: auto;
+    }
+
+    .nav-btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      padding: 12px 24px;
+      border-radius: var(--radius-md);
+      text-decoration: none;
+      font-size: 15px;
+      font-weight: 600;
+      cursor: pointer;
+      border: none;
+      transition: all 0.3s ease;
+    }
+
+    .nav-btn-primary {
+      background: var(--gradient-primary);
+      color: black;
+      box-shadow: var(--shadow-glow);
+    }
+
+    .nav-btn-primary:hover {
+      transform: translateY(-4px);
+      box-shadow: 0 12px 32px rgba(0, 212, 255, 0.4);
+    }
+
+    /* Loading State */
+    .loading {
+      text-align: center;
+      padding: 60px 40px;
+    }
+
+    .loading-spinner {
+      border: 3px solid rgba(0, 212, 255, 0.1);
+      border-top: 3px solid var(--accent-primary);
+      border-radius: 50%;
+      width: 50px;
+      height: 50px;
+      animation: spin 1s linear infinite;
+      margin: 0 auto 20px;
+    }
+
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+
+    /* Responsive */
+    @media (max-width: 768px) {
+      main {
+        padding: 100px 16px 60px;
+      }
+
+      .page-title {
+        font-size: 32px;
+      }
+
+      .analysis-list {
+        grid-template-columns: 1fr;
+      }
+
+      .controls-section {
+        flex-direction: column;
+        gap: 16px;
+      }
+
+      .search-box {
+        width: 100%;
+      }
+
+      .filter-group {
+        width: 100%;
+        flex-wrap: wrap;
+      }
+
+      .nav-links {
+        display: none;
+      }
+
+      .mobile-menu-btn {
+        display: block;
+      }
+
+      .analysis-meta {
+        grid-template-columns: 1fr;
+      }
+    }
+  </style>
+</head>
+<body>
+  <!-- Header/Navigation -->
+  <header class="site-header">
+    <div class="nav-container">
+      <a href="landing.html" class="logo">
+        <i class="fas fa-brain-circuit logo-icon"></i>
+        SHAND
+      </a>
+      <nav class="nav-links">
+        <a href="landing.html" class="nav-link">Home</a>
+        <a href="index.html" class="nav-link">Analyzer</a>
+        <a href="all-analysis.html" class="nav-link active">All Analysis</a>
+        <a href="about.html" class="nav-link">About</a>
+      </nav>
+      <button class="mobile-menu-btn">
+        <i class="fas fa-bars"></i>
+      </button>
+    </div>
+  </header>
+
+  <main>
+    <!-- Page Header -->
+    <section class="page-header">
+      <h1 class="page-title">Analysis History</h1>
+      <p class="page-subtitle">Browse all your previous assumption analyses. View detailed risk assessments and track patterns over time.</p>
+    </section>
+
+    <!-- Controls -->
+    <section class="controls-section">
+      <div class="search-box">
+        <i class="fas fa-search"></i>
+        <input type="text" id="search-input" placeholder="Search analyses...">
+      </div>
+      <div class="filter-group">
+        <button class="filter-btn active" data-filter="all">All</button>
+        <button class="filter-btn" data-filter="completed">Completed</button>
+        <button class="filter-btn" data-filter="failed">Failed</button>
+      </div>
+    </section>
+
+    <!-- Analysis List -->
+    <section id="analysis-list" class="analysis-list">
+      <!-- Will be populated by JavaScript -->
+    </section>
+
+    <!-- Loading State -->
+    <div id="loading-state" class="loading" style="display: none;">
+      <div class="loading-spinner"></div>
+      <p style="color: var(--text-secondary);">Loading analyses...</p>
+    </div>
+
+    <!-- Empty State -->
+    <div id="empty-state" class="empty-state" style="display: none;">
+      <div class="empty-icon">
+        <i class="fas fa-history"></i>
+      </div>
+      <h3 class="empty-title">No Analyses Yet</h3>
+      <p class="empty-text">You haven't performed any analyses yet. Start by using the analyzer to detect assumptions in your text.</p>
+      <a href="index.html" class="nav-btn nav-btn-primary">
+        <i class="fas fa-arrow-right" style="margin-right: 10px;"></i>
+        Go to Analyzer
+      </a>
+    </div>
+  </main>
+
+  <script>
+    document.addEventListener('DOMContentLoaded', function() {
+      const analysisList = document.getElementById('analysis-list');
+      const emptyState = document.getElementById('empty-state');
+      const loadingState = document.getElementById('loading-state');
+      const searchInput = document.getElementById('search-input');
+      const filterBtns = document.querySelectorAll('.filter-btn');
+
+      let allAnalyses = [];
+      let filteredAnalyses = [];
+
+      // Mobile menu toggle
+      const mobileMenuBtn = document.querySelector('.mobile-menu-btn');
+      const navLinks = document.querySelector('.nav-links');
+
+      mobileMenuBtn.addEventListener('click', () => {
+        navLinks.style.display = navLinks.style.display === 'flex' ? 'none' : 'flex';
+        if (navLinks.style.display === 'flex') {
+          navLinks.style.flexDirection = 'column';
+          navLinks.style.position = 'absolute';
+          navLinks.style.top = '100%';
+          navLinks.style.left = '0';
+          navLinks.style.width = '100%';
+          navLinks.style.backgroundColor = 'rgba(10, 10, 10, 0.95)';
+          navLinks.style.backdropFilter = 'blur(10px)';
+          navLinks.style.padding = '20px';
+          navLinks.style.gap = '20px';
+          navLinks.style.borderTop = '1px solid rgba(255, 255, 255, 0.05)';
+          navLinks.style.zIndex = '1000';
+        }
+      });
+
+      // Fetch analyses from API
+      async function loadAnalyses() {
+        loadingState.style.display = 'block';
+        analysisList.innerHTML = '';
+        emptyState.style.display = 'none';
+
+        try {
+          const response = await fetch('/analyze/api/analyses/');
+          if (response.ok) {
+            const data = await response.json();
+            allAnalyses = data.results || data || [];
+          } else {
+            // Fallback: no data yet
+            allAnalyses = [];
+          }
+        } catch (error) {
+          console.error('Error loading analyses:', error);
+          allAnalyses = [];
+        }
+
+        loadingState.style.display = 'none';
+        renderAnalyses();
+      }
+
+      // Render analyses
+      function renderAnalyses(filter = 'all', searchTerm = '') {
+        const searchLower = searchTerm.toLowerCase();
+
+        filteredAnalyses = allAnalyses.filter(analysis => {
+          const matchesFilter = filter === 'all' || analysis.status === filter;
+          const matchesSearch = !searchTerm ||
+            analysis.input_text.toLowerCase().includes(searchLower) ||
+            (analysis.model_used && analysis.model_used.toLowerCase().includes(searchLower));
+          return matchesFilter && matchesSearch;
+        });
+
+        if (filteredAnalyses.length === 0) {
+          analysisList.innerHTML = '';
+          emptyState.style.display = 'block';
+          return;
+        }
+
+        emptyState.style.display = 'none';
+        analysisList.innerHTML = filteredAnalyses.map(analysis => {
+          const date = new Date(analysis.created_at);
+          const dateStr = date.toLocaleDateString('en-US', {
+            year: 'numeric',
+            month: 'short',
+            day: 'numeric',
+            hour: '2-digit',
+            minute: '2-digit'
+          });
+
+          return `
+            <div class="analysis-card">
+              <div class="analysis-header">
+                <div class="analysis-id">Analysis #${analysis.id}</div>
+                <div class="analysis-status ${analysis.status}">${analysis.status.toUpperCase()}</div>
+              </div>
+
+              <div class="analysis-meta">
+                <div class="meta-item">
+                  <span class="meta-label">Type</span>
+                  <span class="meta-value">${analysis.analysis_type || 'LLM Local'}</span>
+                </div>
+                <div class="meta-item">
+                  <span class="meta-label">Model</span>
+                  <span class="meta-value">${analysis.model_used || 'N/A'}</span>
+                </div>
+              </div>
+
+              <div class="risk-summary">
+                <div class="risk-item high">
+                  <span class="risk-count">${analysis.high_risk_count || 0}</span>
+                  <span class="risk-label">High Risk</span>
+                </div>
+                <div class="risk-item medium">
+                  <span class="risk-count">${analysis.medium_risk_count || 0}</span>
+                  <span class="risk-label">Medium Risk</span>
+                </div>
+                <div class="risk-item low">
+                  <span class="risk-count">${analysis.low_risk_count || 0}</span>
+                  <span class="risk-label">Low Risk</span>
+                </div>
+              </div>
+
+              <p class="analysis-text-preview">${analysis.input_text.substring(0, 150)}${analysis.input_text.length > 150 ? '...' : ''}</p>
+
+              <div class="analysis-footer">
+                <span class="analysis-date">${dateStr}</span>
+                <a href="analysis.html?id=${analysis.id}" class="view-btn">View Details</a>
+              </div>
+            </div>
+          `;
+        }).join('');
+      }
+
+      // Search functionality
+      searchInput.addEventListener('input', (e) => {
+        const currentFilter = document.querySelector('.filter-btn.active').dataset.filter;
+        renderAnalyses(currentFilter, e.target.value);
+      });
+
+      // Filter functionality
+      filterBtns.forEach(btn => {
+        btn.addEventListener('click', function() {
+          filterBtns.forEach(b => b.classList.remove('active'));
+          this.classList.add('active');
+          const filter = this.dataset.filter;
+          renderAnalyses(filter, searchInput.value);
+        });
+      });
+
+      // Load analyses on page load
+      loadAnalyses();
+    });
+  </script>
+</body>
+</html>

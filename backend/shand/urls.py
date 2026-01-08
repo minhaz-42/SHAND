@@ -4,6 +4,7 @@ from django.shortcuts import redirect
 urlpatterns = [
     path('', lambda request: redirect('/landing.html')),
     path("analyze/", include("engine.urls")),
+    path("api/", include("engine.urls")),
 ]
 
 # Serve static frontend files at root in development

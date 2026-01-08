@@ -4,6 +4,7 @@ Import these into your main views.py
 """
 
 import logging
+import time
 from django.conf import settings
 from rest_framework.views import APIView
 from rest_framework.response import Response
@@ -16,6 +17,7 @@ from .llm_local import (
     build_graph_from_llm_assumptions,
     generate_report_with_llm
 )
+from .db_utils import save_analysis_session
 
 logger = logging.getLogger(__name__)
 
@@ -62,6 +64,9 @@ class AnalyzeLLMLocalAPIView(APIView):
             }, status=status.HTTP_400_BAD_REQUEST)
 
         try:
+            # Track processing time
+            start_time = time.time()
+            
             # Use LLM to analyze assumptions
             llm_result = analyze_assumptions_with_llm(text, model=model)
             
@@ -69,6 +74,21 @@ class AnalyzeLLMLocalAPIView(APIView):
             
             if "error" in llm_result and not llm_result.get("assumptions"):
                 logger.error(f"LLM error: {llm_result.get('error')}")
+                processing_time = time.time() - start_time
+                
+                # Save failed analysis
+                try:
+                    save_analysis_session(
+                        input_text=text,
+                        assumptions=[],
+                        analysis_type='llm_local',
+                        model_used=model,
+                        processing_time=processing_time,
+                        error_message=llm_result.get('error', 'Unknown error')
+                    )
+                except Exception as e:
+                    logger.warning(f"Could not save failed analysis: {str(e)}")
+                
                 return Response(llm_result, status=status.HTTP_503_SERVICE_UNAVAILABLE)
             
             assumptions = llm_result.get("assumptions", [])
@@ -79,18 +99,52 @@ class AnalyzeLLMLocalAPIView(APIView):
             # Generate executive summary
             summary = generate_report_with_llm(text, assumptions, model=model)
             
+            processing_time = time.time() - start_time
+            
+            # Save analysis to database
+            try:
+                session = save_analysis_session(
+                    input_text=text,
+                    assumptions=assumptions,
+                    analysis_type='llm_local',
+                    model_used=model,
+                    executive_summary=summary,
+                    processing_time=processing_time
+                )
+                session_id = session.id
+            except Exception as e:
+                logger.warning(f"Could not save analysis to database: {str(e)}")
+                session_id = None
+            
             return Response({
+                "session_id": session_id,
                 "assumptions": assumptions,
                 "graph": graph,
                 "executive_summary": summary,
                 "analysis_type": "llm_local",
                 "model_used": model,
                 "analysis_quality": llm_result.get("analysis_quality", "medium"),
-                "total_assumptions": llm_result.get("total_assumptions", len(assumptions))
+                "total_assumptions": llm_result.get("total_assumptions", len(assumptions)),
+                "processing_time": processing_time
             })
         
         except Exception as e:
             logger.exception(f"Unexpected error in LLM analysis")
+            processing_time = time.time() - start_time
+            
+            # Save error state
+            try:
+                save_analysis_session(
+                    input_text=text,
+                    assumptions=[],
+                    analysis_type='llm_local',
+                    model_used=model,
+                    processing_time=processing_time,
+                    error_message=str(e)
+                )
+            except:
+                pass
+            
             return Response({
                 "error": f"Analysis failed: {str(e)}",
                 "analysis_type": "llm_local"

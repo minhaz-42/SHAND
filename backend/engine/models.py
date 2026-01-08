@@ -18,6 +18,10 @@ class AnalysisSession(models.Model):
         ('completed', 'Completed'),
         ('failed', 'Failed'),
     ]
+    # ...existing code...
+    total_claims = models.PositiveIntegerField(default=0, help_text="Total claims parsed from LLM output")
+    hallucination_count = models.PositiveIntegerField(default=0, help_text="Total hallucination signals detected")
+    hallucination_rate = models.FloatField(default=0.0, help_text="hallucination_rate = (unsupported + assumption + contradiction + schema_failures) / total_claims")
     
     id = models.AutoField(primary_key=True)
     input_text = models.TextField(help_text="Original text analyzed")
@@ -37,9 +41,6 @@ class AnalysisSession(models.Model):
     )
     model_used = models.CharField(max_length=100, default='neural-chat:7b')
     
-    # Results
-    total_assumptions = models.IntegerField(default=0)
-    high_risk_count = models.IntegerField(default=0)
     medium_risk_count = models.IntegerField(default=0)
     low_risk_count = models.IntegerField(default=0)
     
@@ -67,6 +68,7 @@ class AnalysisSession(models.Model):
         return f"Analysis {self.id} - {self.status} ({self.total_assumptions} assumptions)"
 
 
+
 class Assumption(models.Model):
     """
     An individual assumption detected in analysis.
@@ -77,7 +79,6 @@ class Assumption(models.Model):
         ('high', 'High'),
         ('critical', 'Critical'),
     ]
-    
     CATEGORY_CHOICES = [
         ('behavioral', 'Behavioral'),
         ('causal', 'Causal Relationship'),
@@ -89,28 +90,21 @@ class Assumption(models.Model):
         ('ethical', 'Ethical'),
         ('other', 'Other'),
     ]
-    
     session = models.ForeignKey(AnalysisSession, on_delete=models.CASCADE, related_name='assumptions')
-    
     # Core assumption data
     assumption_text = models.TextField(help_text="The actual assumption statement")
     reasoning = models.TextField(help_text="Why this is considered an assumption")
-    
     # Classification
     category = models.CharField(max_length=50, choices=CATEGORY_CHOICES, default='other')
     risk_level = models.CharField(max_length=20, choices=RISK_LEVEL_CHOICES, default='medium')
     confidence = models.FloatField(default=0.5, help_text="LLM confidence 0.0-1.0")
-    
     # Impact analysis
     what_breaks = models.TextField(help_text="What fails if this assumption is false")
     source_evidence = models.TextField(blank=True, help_text="Quote from text supporting this assumption")
-    
     # Tracking
     position_in_analysis = models.IntegerField(help_text="Order detected in analysis (1-based)")
     llm_generated = models.BooleanField(default=True)
-    
     created_at = models.DateTimeField(auto_now_add=True)
-    
     class Meta:
         app_label = "engine"
         ordering = ['position_in_analysis']
@@ -119,9 +113,28 @@ class Assumption(models.Model):
             models.Index(fields=['risk_level']),
             models.Index(fields=['category']),
         ]
-    
     def __str__(self):
         return f"Assumption {self.position_in_analysis} - {self.risk_level.upper()}"
+
+class HallucinationEvent(models.Model):
+    """
+    Tracks hallucination signals for claims in a session.
+    """
+    EVENT_TYPES = [
+        ("unsupported", "Unsupported Claim"),
+        ("assumption", "Assumption Leakage"),
+        ("contradiction", "Internal Contradiction"),
+        ("schema", "Schema/Validation Failure"),
+        ("user_flag", "User-Flagged Issue"),
+    ]
+    session = models.ForeignKey(AnalysisSession, on_delete=models.CASCADE, related_name="hallucination_events")
+    claim_id = models.CharField(max_length=64)
+    event_type = models.CharField(max_length=16, choices=EVENT_TYPES)
+    claim_text = models.TextField()
+    confidence_level = models.CharField(max_length=16)
+    created_at = models.DateTimeField(auto_now_add=True)
+    def __str__(self):
+        return f"{self.event_type} | {self.claim_id} | {self.confidence_level}"
 
 
 class AssumptionDependency(models.Model):

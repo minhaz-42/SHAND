@@ -52,4 +52,4 @@ STATICFILES_DIRS = [os.path.join(BASE_DIR, "../frontend")]
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 # Limit for the MVP
-MAX_INPUT_WORDS = 5000
+MAX_INPUT_WORDS = 8000

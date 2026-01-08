@@ -767,6 +767,7 @@
       <nav class="nav-links">
         <a href="landing.html" class="nav-link">Home</a>
         <a href="index.html" class="nav-link active">Analyzer</a>
+        <a href="all-analysis.html" class="nav-link">All Analysis</a>
         <a href="about.html" class="nav-link">About</a>
       </nav>
       <button class="mobile-menu-btn">
@@ -789,7 +790,7 @@
       </div>
       
       <h1 class="page-title">Analyze Assumptions</h1>
-      <p class="page-subtitle">Paste English text (max 5000 words). SHAND will surface hidden assumptions for you to examine with deterministic, explainable logic.</p>
+      <p class="page-subtitle">Paste English text (max 8000 words). SHAND will surface hidden assumptions for you to examine with deterministic, explainable logic.</p>
     </section>
 
     <!-- Input Section -->
@@ -823,7 +824,7 @@
         <div class="counter-container">
           <div class="counter" id="word-counter">
             <i class="fas fa-font counter-icon"></i>
-            <span id="word-count">0</span> / 5000 words
+            <span id="word-count">0</span> / 8000 words
           </div>
           <div class="counter" id="char-counter">
             <i class="fas fa-keyboard counter-icon"></i>
@@ -946,7 +947,7 @@
         // Update counter styling
         if (words === 0) {
           wordCounter.className = 'counter';
-        } else if (words > 5000) {
+        } else if (words > 8000) {
           wordCounter.className = 'counter danger';
         } else if (words > 600) {
           wordCounter.className = 'counter warning';
@@ -1007,7 +1008,7 @@
 
       // Analyze function
       async function analyzeText(text) {
-        showFeedback('Analyzing text for hidden assumptions...', 'info');
+        showFeedback('Analyzing text for hidden assumptions... This may take a few minutes.', 'info');
         
         // Show loading state
         analyzeBtn.innerHTML = `
@@ -1035,6 +1036,9 @@
           });
           
           if (!response.ok) {
+            if (response.status === 503) {
+              throw new Error('Ollama service is unavailable. Make sure Ollama is running: ollama serve');
+            }
             throw new Error(`API error: ${response.statusText}`);
           }
           
@@ -1045,7 +1049,7 @@
             text: text.substring(0, 500) + (text.length > 500 ? '...' : ''),
             assumptions: result.assumptions || [],
             graph: result.graph || {},
-            summary: result.summary || '',
+            summary: result.summary || result.executive_summary || '',
             timestamp: new Date().toISOString()
           };
           
@@ -1062,7 +1066,13 @@
           
         } catch (error) {
           console.error('Analysis error:', error);
-          showFeedback('Analysis failed. Please try again. Make sure Ollama is running.', 'error');
+          
+          let errorMsg = 'Analysis failed. Please try again.';
+          if (error.message.includes('Ollama')) {
+            errorMsg = error.message;
+          }
+          
+          showFeedback(errorMsg, 'error');
           
           // Reset button
           analyzeBtn.innerHTML = `
@@ -1084,8 +1094,8 @@
           return;
         }
         
-        if (words > 5000) {
-          showFeedback('Text exceeds 5000 word limit. Please shorten your input.', 'warning');
+        if (words > 8000) {
+          showFeedback('Text exceeds 8000 word limit. Please shorten your input.', 'warning');
           return;
         }
         

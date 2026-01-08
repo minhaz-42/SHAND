@@ -1,0 +1,381 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>SHAND — Hallucination Dashboard</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <style>
+    body { background: #0a0a0a; color: #fff; font-family: Inter, sans-serif; margin: 0; }
+    .container { max-width: 900px; margin: 0 auto; padding: 60px 24px; }
+    .title { font-size: 2.5rem; font-weight: 700; margin-bottom: 12px; background: linear-gradient(135deg, #00d4ff 0%, #8b5cf6 100%); -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent; }
+    .subtitle { font-size: 1.1rem; color: #a0a0a0; margin-bottom: 32px; }
+    .explanation { background: #111; border-radius: 8px; padding: 18px; margin-bottom: 32px; color: #a0a0a0; font-size: 1rem; }
+    .stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 24px; margin-bottom: 40px; }
+    .stat-card { background: #111; border-radius: 10px; padding: 24px; text-align: center; box-shadow: 0 2px 12px rgba(0,0,0,0.2); }
+    .stat-label { font-size: 1rem; color: #a0a0a0; margin-bottom: 8px; }
+    .stat-value { font-size: 2.2rem; font-weight: 700; margin-bottom: 4px; }
+    .signal-breakdown { margin-bottom: 40px; }
+    .signal-row { display: flex; align-items: center; gap: 12px; margin-bottom: 10px; }
+    .signal-dot { width: 18px; height: 18px; border-radius: 50%; display: inline-block; }
+    .dot-yellow { background: #fbbf24; }
+    .dot-orange { background: #f97316; }
+    .dot-red { background: #ef4444; }
+    .dot-gray { background: #6b7280; }
+    .model-table { width: 100%; border-collapse: collapse; background: #111; border-radius: 8px; overflow: hidden; }
+    .model-table th, .model-table td { padding: 12px 8px; text-align: left; }
+    .model-table th { background: #222; color: #a0a0a0; }
+    .model-table tr { border-bottom: 1px solid #222; }
+    .model-table td { color: #fff; }
+    @media (max-width: 600px) { .container { padding: 24px 8px; } .title { font-size: 2rem; } }
+  </style>
+</head>
+<body>
+  <header class="site-header" style="background:rgba(10,10,10,0.85);padding:20px 0;margin-bottom:32px;">
+    <nav style="max-width:900px;margin:0 auto;display:flex;justify-content:space-between;align-items:center;padding:0 24px;">
+      <a href="landing.html" style="font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:24px;color:#fff;text-decoration:none;display:flex;align-items:center;gap:12px;"><i class="fas fa-brain-circuit" style="color:#00d4ff;font-size:28px;"></i>SHAND</a>
+      <div style="display:flex;gap:32px;">
+        <a href="landing.html" style="color:#a0a0a0;text-decoration:none;font-weight:500;font-size:16px;padding:8px 12px;border-radius:8px;">Home</a>
+        <a href="index.html" style="color:#a0a0a0;text-decoration:none;font-weight:500;font-size:16px;padding:8px 12px;border-radius:8px;">Analyzer</a>
+        <a href="all-analysis.html" style="color:#a0a0a0;text-decoration:none;font-weight:500;font-size:16px;padding:8px 12px;border-radius:8px;">All Analysis</a>
+        <a href="hallucination-dashboard.html" style="color:#00d4ff;text-decoration:none;font-weight:700;font-size:16px;padding:8px 12px;border-radius:8px;background:rgba(0,212,255,0.1);">Hallucination Dashboard</a>
+        <a href="about.html" style="color:#a0a0a0;text-decoration:none;font-weight:500;font-size:16px;padding:8px 12px;border-radius:8px;">About</a>
+      </div>
+    </nav>
+  </header>
+  <div class="container">
+    <div class="title">Hallucination Dashboard</div>
+    <div class="subtitle">Session trends, signal breakdown, and model comparison for all analyses.</div>
+    <div class="explanation">
+      <strong>What is a hallucination rate?</strong><br>
+      This system operationalizes hallucination as <em>confidence without sufficient support</em>, not factual incorrectness. Metrics are based on internal support signals, not external fact-checking. No judgment or blame—these are signals for thoughtful review.
+    </div>
+    <div id="stats-section">
+      <!-- Stats will be loaded here -->
+    </div>
+    <div class="signal-breakdown">
+      <h3 style="margin-bottom:12px;">Signal Breakdown</h3>
+
+      <!doctype html>
+      <html lang="en">
+      <head>
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width,initial-scale=1">
+        <title>SHAND — Hallucination</title>
+        <link rel="preconnect" href="https://fonts.googleapis.com">
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+        <style>
+          :root {
+            --bg-main: #0a0a0a;
+            --bg-card: #111111;
+            --bg-card-hover: #1a1a1a;
+            --text-primary: #ffffff;
+            --text-secondary: #a0a0a0;
+            --text-tertiary: #666666;
+            --border-light: #222222;
+            --border-medium: #333333;
+            --accent-primary: #00d4ff;
+            --accent-primary-hover: #00b8e0;
+            --accent-secondary: #8b5cf6;
+            --accent-tertiary: #10b981;
+            --gradient-primary: linear-gradient(135deg, #00d4ff 0%, #8b5cf6 100%);
+            --gradient-secondary: linear-gradient(135deg, #8b5cf6 0%, #ec4899 100%);
+            --gradient-tertiary: linear-gradient(135deg, #10b981 0%, #00d4ff 100%);
+            --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.8);
+            --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.6);
+            --shadow-lg: 0 20px 40px rgba(0, 0, 0, 0.4);
+            --shadow-glow: 0 0 40px rgba(0, 212, 255, 0.2);
+            --radius-sm: 8px;
+            --radius-md: 12px;
+            --radius-lg: 16px;
+            --radius-xl: 24px;
+            --radius-full: 999px;
+          }
+          * { margin: 0; padding: 0; box-sizing: border-box; }
+          html { background: var(--bg-main); scroll-behavior: smooth; }
+          body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            line-height: 1.6;
+            color: var(--text-primary);
+            background: var(--bg-main);
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+            overflow-x: hidden;
+          }
+          main {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 80px 24px 100px;
+          }
+          .site-header {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            z-index: 1000;
+            padding: 20px 0;
+            background: rgba(10, 10, 10, 0.85);
+            backdrop-filter: blur(10px);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+          }
+          .nav-container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 0 24px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+          }
+          .logo {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            font-family: 'Space Grotesk', sans-serif;
+            font-weight: 700;
+            font-size: 24px;
+            color: var(--text-primary);
+            text-decoration: none;
+          }
+          .logo-icon {
+            color: var(--accent-primary);
+            font-size: 28px;
+          }
+          .nav-links {
+            display: flex;
+            gap: 32px;
+          }
+          .nav-link {
+            color: var(--text-secondary);
+            text-decoration: none;
+            font-weight: 500;
+            font-size: 16px;
+            transition: all 0.3s ease;
+            padding: 8px 12px;
+            border-radius: var(--radius-sm);
+          }
+          .nav-link:hover {
+            color: var(--text-primary);
+            background: rgba(255, 255, 255, 0.05);
+          }
+          .nav-link.active {
+            color: var(--accent-primary);
+            background: rgba(0, 212, 255, 0.1);
+          }
+          .dashboard-section {
+            margin-top: 80px;
+            text-align: center;
+          }
+          .dashboard-title {
+            font-size: 56px;
+            font-weight: 800;
+            margin-bottom: 24px;
+            line-height: 1.05;
+            font-family: 'Space Grotesk', sans-serif;
+            background: linear-gradient(to right, #ffffff, var(--accent-primary), var(--accent-secondary));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            position: relative;
+            text-shadow: 0 0 80px rgba(0, 212, 255, 0.3);
+          }
+          .dashboard-title::after {
+            content: '';
+            position: absolute;
+            bottom: -10px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 150px;
+            height: 5px;
+            background: var(--gradient-primary);
+            border-radius: var(--radius-full);
+            box-shadow: 0 0 20px rgba(0, 212, 255, 0.5);
+          }
+          .dashboard-subtitle {
+            font-size: 22px;
+            color: var(--text-secondary);
+            margin: 0 auto 48px;
+            line-height: 1.7;
+            max-width: 800px;
+            font-weight: 400;
+          }
+          .explanation {
+            background: var(--bg-card);
+            border-radius: 8px;
+            padding: 18px;
+            margin-bottom: 32px;
+            color: var(--text-secondary);
+            font-size: 1rem;
+            max-width: 900px;
+            margin-left: auto;
+            margin-right: auto;
+            box-shadow: var(--shadow-md);
+          }
+          .stats-grid {
+            display: flex;
+            justify-content: center;
+            gap: 60px;
+            margin-bottom: 60px;
+            flex-wrap: wrap;
+          }
+          .stat-item {
+            text-align: center;
+            padding: 24px;
+            min-width: 180px;
+            position: relative;
+            background: var(--bg-card);
+            border-radius: var(--radius-lg);
+            border: 1px solid var(--border-light);
+            box-shadow: var(--shadow-sm);
+          }
+          .stat-item::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 40px;
+            height: 3px;
+            background: var(--gradient-primary);
+            border-radius: var(--radius-full);
+            opacity: 0.7;
+          }
+          .stat-number {
+            font-size: 52px;
+            font-weight: 800;
+            background: var(--gradient-primary);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 8px;
+            font-family: 'Space Grotesk', sans-serif;
+            text-shadow: 0 0 30px rgba(0, 212, 255, 0.3);
+          }
+          .stat-label {
+            font-size: 15px;
+            color: var(--text-secondary);
+            text-transform: uppercase;
+            letter-spacing: 1.5px;
+            font-weight: 500;
+          }
+          .signal-breakdown {
+            margin-bottom: 40px;
+            max-width: 900px;
+            margin-left: auto;
+            margin-right: auto;
+            background: var(--bg-card);
+            border-radius: var(--radius-lg);
+            border: 1px solid var(--border-light);
+            box-shadow: var(--shadow-sm);
+            padding: 32px;
+          }
+          .signal-row { display: flex; align-items: center; gap: 12px; margin-bottom: 10px; }
+          .signal-dot { width: 18px; height: 18px; border-radius: 50%; display: inline-block; }
+          .dot-yellow { background: #fbbf24; }
+          .dot-orange { background: #f97316; }
+          .dot-red { background: #ef4444; }
+          .dot-gray { background: #6b7280; }
+          .model-table {
+            width: 100%;
+            border-collapse: collapse;
+            background: var(--bg-card);
+            border-radius: var(--radius-lg);
+            overflow: hidden;
+            margin-bottom: 60px;
+            box-shadow: var(--shadow-sm);
+          }
+          .model-table th, .model-table td { padding: 12px 8px; text-align: left; }
+          .model-table th { background: #222; color: #a0a0a0; }
+          .model-table tr { border-bottom: 1px solid #222; }
+          .model-table td { color: #fff; }
+          @media (max-width: 600px) {
+            main { padding: 24px 8px 60px; }
+            .dashboard-title { font-size: 2rem; }
+            .stats-grid { gap: 20px; }
+          }
+        </style>
+      </head>
+      <body>
+        <header class="site-header">
+          <div class="nav-container">
+            <a href="landing.html" class="logo"><i class="fas fa-brain-circuit logo-icon"></i>SHAND</a>
+            <nav class="nav-links">
+              <a href="landing.html" class="nav-link">Home</a>
+              <a href="index.html" class="nav-link">Analyzer</a>
+              <a href="all-analysis.html" class="nav-link">All Analysis</a>
+              <a href="hallucination-dashboard.html" class="nav-link active">Hallucination</a>
+              <a href="about.html" class="nav-link">About</a>
+            </nav>
+          </div>
+        </header>
+        <main>
+          <section class="dashboard-section">
+            <h1 class="dashboard-title">Hallucination</h1>
+            <p class="dashboard-subtitle">Session trends, signal breakdown, and model comparison for all analyses.</p>
+            <div class="explanation">
+              <strong>What is a hallucination rate?</strong><br>
+              This system operationalizes hallucination as <em>confidence without sufficient support</em>, not factual incorrectness. Metrics are based on internal support signals, not external fact-checking. No judgment or blame—these are signals for thoughtful review.
+            </div>
+            <div class="stats-grid" id="stats-section">
+              <!-- Stats will be loaded here -->
+            </div>
+            <div class="signal-breakdown">
+              <h3 style="margin-bottom:12px;">Signal Breakdown</h3>
+              <div id="signal-rows"></div>
+            </div>
+            <div>
+              <h3 style="margin-bottom:12px;">Model Comparison</h3>
+              <table class="model-table" id="model-table">
+                <thead>
+                  <tr><th>Model</th><th>Sessions</th><th>Avg. Hallucination Rate</th></tr>
+                </thead>
+                <tbody></tbody>
+              </table>
+            </div>
+          </section>
+        </main>
+        <script>
+          async function loadStats() {
+            const res = await fetch('/api/hallucinations/stats/');
+            const data = await res.json();
+            document.getElementById('stats-section').innerHTML = `
+              <div class="stat-item">
+                <div class="stat-number">${data.total_sessions}</div>
+                <div class="stat-label">Total Sessions</div>
+              </div>
+              <div class="stat-item">
+                <div class="stat-number">${(data.average_hallucination_rate * 100).toFixed(1)}%</div>
+                <div class="stat-label">Average Hallucination Rate</div>
+              </div>
+            `;
+            // Signal breakdown
+            const signalRows = document.getElementById('signal-rows');
+            signalRows.innerHTML = '';
+            const signalMap = {
+              unsupported: { label: 'Low Support Claims', dot: 'dot-yellow' },
+              assumption: { label: 'Weak Evidence', dot: 'dot-orange' },
+              contradiction: { label: 'Contradictions', dot: 'dot-red' },
+              schema: { label: 'Schema Issues', dot: 'dot-gray' },
+              user_flag: { label: 'User-Flagged', dot: 'dot-gray' }
+            };
+            Object.entries(data.signal_breakdown).forEach(([type, count]) => {
+              const info = signalMap[type] || { label: type, dot: 'dot-gray' };
+              const row = document.createElement('div');
+              row.className = 'signal-row';
+              row.innerHTML = `<span class="signal-dot ${info.dot}"></span> <span>${info.label}</span> <span style="margin-left:auto;font-weight:600;">${count}</span>`;
+              signalRows.appendChild(row);
+            });
+            // Model comparison
+            const tbody = document.querySelector('#model-table tbody');
+            tbody.innerHTML = '';
+            Object.entries(data.model_stats).forEach(([model, stats]) => {
+              const tr = document.createElement('tr');
+              tr.innerHTML = `<td>${model}</td><td>${stats.count}</td><td>${(stats.avg_rate * 100).toFixed(1)}%</td>`;
+              tbody.appendChild(tr);
+            });
+          }
+          loadStats();
+        </script>
+      </body>
+      </html>

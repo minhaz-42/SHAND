@@ -1,3 +1,85 @@
+# --- Hallucination Signal Detection ---
+# This system operationalizes hallucination as confidence without sufficient support, not factual incorrectness.
+# Signals are detected from LLM output structure, following support-based taxonomy.
+from .models import AnalysisSession, HallucinationEvent
+import uuid
+
+def process_claims_and_hallucinations(session: AnalysisSession, llm_response: dict, user_text: str):
+    """
+    Parses claims from LLM output, detects hallucination signals, logs events, and computes hallucination rate.
+    Args:
+        session: AnalysisSession instance
+        llm_response: dict with 'claims' and 'summary' from LLM
+        user_text: original input text
+    """
+    claims = llm_response.get('claims', [])
+    total_claims = len(claims)
+    hallucination_count = 0
+    signal_types = ['unsupported', 'assumption_leak', 'contradiction', 'schema']
+
+    for claim in claims:
+        claim_id = claim.get('claim_id') or str(uuid.uuid4())
+        text = claim.get('text', '')
+        confidence = claim.get('confidence', 'medium')
+        support = claim.get('support', {})
+        signals = claim.get('signals', {})
+
+        # --- Signal Detection ---
+        # Unsupported Claim: Assertive, no citation/derivation, not in user text
+        if signals.get('unsupported', False):
+            HallucinationEvent.objects.create(
+                session=session,
+                claim_id=claim_id,
+                event_type='unsupported',
+                claim_text=text,
+                confidence_level=confidence
+            )
+            hallucination_count += 1
+
+        # Assumption Leakage: Hidden assumptions as facts, not marked
+        if signals.get('assumption_leak', False):
+            HallucinationEvent.objects.create(
+                session=session,
+                claim_id=claim_id,
+                event_type='assumption',
+                claim_text=text,
+                confidence_level=confidence
+            )
+            hallucination_count += 1
+
+        # Internal Contradiction: Conflicting claims in session
+        if signals.get('contradiction', False):
+            HallucinationEvent.objects.create(
+                session=session,
+                claim_id=claim_id,
+                event_type='contradiction',
+                claim_text=text,
+                confidence_level=confidence
+            )
+            hallucination_count += 1
+
+        # Schema/Validation Failure: Missing required fields, invalid output
+        if signals.get('schema', False):
+            HallucinationEvent.objects.create(
+                session=session,
+                claim_id=claim_id,
+                event_type='schema',
+                claim_text=text,
+                confidence_level=confidence
+            )
+            hallucination_count += 1
+
+    # Compute hallucination rate (do not penalize user_flag)
+    hallucination_rate = (hallucination_count / total_claims) if total_claims > 0 else 0.0
+    session.total_claims = total_claims
+    session.hallucination_count = hallucination_count
+    session.hallucination_rate = hallucination_rate
+    session.save()
+    return {
+        'total_claims': total_claims,
+        'hallucination_count': hallucination_count,
+        'hallucination_rate': hallucination_rate
+    }
 """
 Database utility functions for saving analysis results.
 """
@@ -20,7 +102,7 @@ def save_analysis_session(
     model_used: str = 'neural-chat:7b',
     executive_summary: str = '',
     processing_time: float = 0,
-    error_message: str = None,
+    error_message: str | None = None,
 ):
     """
     Save a complete analysis session to the database.
@@ -92,8 +174,7 @@ def save_analysis_session(
             )
         
         # Update session counts
-        session.total_assumptions = len(assumptions)
-        session.high_risk_count = high_risk
+        # Removed unknown attributes total_assumptions and high_risk_count
         session.medium_risk_count = medium_risk
         session.low_risk_count = low_risk
         session.save()
@@ -137,13 +218,13 @@ def get_analysis_summary(session_id: int):
     """
     try:
         session = AnalysisSession.objects.get(id=session_id)
-        assumptions = session.assumptions.all()
+        assumptions = session.assumptions.all()  # type: ignore
         
         return {
             'session_id': session.id,
             'input_length': session.input_text_length,
-            'total_assumptions': session.total_assumptions,
-            'high_risk': session.high_risk_count,
+            'total_claims': session.total_claims,
+            'hallucination_count': session.hallucination_count,
             'medium_risk': session.medium_risk_count,
             'low_risk': session.low_risk_count,
             'analysis_type': session.analysis_type,
@@ -178,7 +259,7 @@ def get_risk_report(session_id: int):
     """
     try:
         session = AnalysisSession.objects.get(id=session_id)
-        assumptions = session.assumptions.all().select_related('risk_assessment')
+        assumptions = session.assumptions.all().select_related('risk_assessment')  # type: ignore
         
         risk_items = []
         for assumption in assumptions:
@@ -206,14 +287,14 @@ def get_risk_report(session_id: int):
             'session_id': session.id,
             'created_at': session.created_at,
             'total_risk_items': len(risk_items),
-            'high_risk_count': session.high_risk_count,
+            # Removed unknown attribute high_risk_count
             'items': risk_items
         }
     except AnalysisSession.DoesNotExist:
         return None
 
 
-def get_analysis_history(limit: int = 100, offset: int = 0, analysis_type: str = None):
+def get_analysis_history(limit: int = 100, offset: int = 0, analysis_type: str | None = None):
     """
     Get analysis history with optional filtering.
     
@@ -237,7 +318,7 @@ def get_analysis_history(limit: int = 100, offset: int = 0, analysis_type: str =
             'id': s.id,
             'created_at': s.created_at,
             'status': s.status,
-            'total_assumptions': s.total_assumptions,
+            'total_claims': s.total_claims,
             'analysis_type': s.analysis_type,
             'model': s.model_used,
             'text_preview': s.input_text[:100] + '...',
