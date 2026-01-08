@@ -795,50 +795,6 @@
 
   <script>
     document.addEventListener('DOMContentLoaded', function() {
-      // Sample data for demonstration
-      const sampleData = {
-        text: "This new policy will reduce inequality by 30% within 5 years while increasing economic growth. The technology will scale to millions of users with minimal infrastructure costs.",
-        assumptions: [
-          {
-            id: 1,
-            text: "Linear correlation between policy implementation and inequality reduction",
-            type: "Causal Relationship",
-            risk: "High",
-            reason: "Assumes direct causation without considering confounding variables, external factors, or implementation challenges",
-            what_breaks: "If correlation is not causal, the policy may fail to reduce inequality despite implementation",
-            risk_justification: "High complexity of social systems, multiple interacting variables, historical evidence of policy failure rates"
-          },
-          {
-            id: 2,
-            text: "Economic growth can be simultaneously increased while reducing inequality",
-            type: "Economic Model",
-            risk: "Medium",
-            reason: "Assumes compatible economic models where growth and equality are mutually reinforcing",
-            what_breaks: "If growth requires capital concentration or if redistribution dampens investment",
-            risk_justification: "Mixed empirical evidence, context-dependent outcomes, theoretical trade-offs in some models"
-          },
-          {
-            id: 3,
-            text: "Technology scaling follows linear cost patterns",
-            type: "Technical Scaling",
-            risk: "Low",
-            reason: "Assumes infrastructure costs scale linearly with user growth",
-            what_breaks: "If scaling reveals hidden technical debt, non-linear infrastructure requirements, or maintenance complexity",
-            risk_justification: "Technical systems often have predictable scaling patterns within certain bounds"
-          },
-          {
-            id: 4,
-            text: "Five-year timeframe is sufficient for measurable inequality reduction",
-            type: "Temporal Assumption",
-            risk: "Medium",
-            reason: "Assumes social change occurs within predictable political and implementation cycles",
-            what_breaks: "If social systems have longer feedback loops, resistance to change, or delayed effects",
-            risk_justification: "Historical precedents vary widely, depends on policy type and social context"
-          }
-        ],
-        timestamp: new Date().toISOString()
-      };
-
       // Mobile menu toggle
       const mobileMenuBtn = document.querySelector('.mobile-menu-btn');
       const navLinks = document.querySelector('.nav-links');
@@ -860,13 +816,20 @@
         }
       });
 
-      // Try to get data from localStorage, fall back to sample data
+      // Get data from localStorage or redirect to analyzer
       let data;
       try {
         const raw = localStorage.getItem('shand_result');
-        data = raw ? JSON.parse(raw) : sampleData;
+        if (!raw) {
+          // No analysis result found, redirect to analyzer
+          window.location.href = 'index.html';
+          return;
+        }
+        data = JSON.parse(raw);
       } catch (e) {
-        data = sampleData;
+        console.error('Error loading analysis result:', e);
+        window.location.href = 'index.html';
+        return;
       }
 
       const assumptions = data.assumptions || [];

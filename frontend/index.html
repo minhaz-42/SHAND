@@ -1023,54 +1023,37 @@
         analyzeBtn.disabled = true;
         
         try {
-          // Simulate API call with timeout
-          await new Promise(resolve => setTimeout(resolve, 1500));
-          
-          // Sample data for demonstration
-          const sampleData = {
-            text: text.substring(0, 500) + (text.length > 500 ? '...' : ''),
-            assumptions: [
-              {
-                id: 1,
-                text: "Linear correlation between policy implementation and inequality reduction",
-                type: "Causal Relationship",
-                risk: "High",
-                reason: "Assumes direct causation without considering confounding variables, external factors, or implementation challenges",
-                what_breaks: "If correlation is not causal, the policy may fail to reduce inequality despite implementation",
-                risk_justification: "High complexity of social systems, multiple interacting variables, historical evidence of policy failure rates"
-              },
-              {
-                id: 2,
-                text: "Economic growth can be simultaneously increased while reducing inequality",
-                type: "Economic Model",
-                risk: "Medium",
-                reason: "Assumes compatible economic models where growth and equality are mutually reinforcing",
-                what_breaks: "If growth requires capital concentration or if redistribution dampens investment",
-                risk_justification: "Mixed empirical evidence, context-dependent outcomes, theoretical trade-offs in some models"
-              },
-              {
-                id: 3,
-                text: "Technology scaling follows linear cost patterns",
-                type: "Technical Scaling",
-                risk: "Low",
-                reason: "Assumes infrastructure costs scale linearly with user growth",
-                what_breaks: "If scaling reveals hidden technical debt, non-linear infrastructure requirements, or maintenance complexity",
-                risk_justification: "Technical systems often have predictable scaling patterns within certain bounds"
-              }
-            ],
-            graph: {
-              1: [2],
-              2: [1],
-              3: []
+          // Call the LLM API endpoint
+          const response = await fetch('/analyze/llm-local/', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
             },
+            body: JSON.stringify({
+              text: text,
+            })
+          });
+          
+          if (!response.ok) {
+            throw new Error(`API error: ${response.statusText}`);
+          }
+          
+          const result = await response.json();
+          
+          // Transform API response to match our format
+          const resultData = {
+            text: text.substring(0, 500) + (text.length > 500 ? '...' : ''),
+            assumptions: result.assumptions || [],
+            graph: result.graph || {},
+            summary: result.summary || '',
             timestamp: new Date().toISOString()
           };
           
           // Store results
-          localStorage.setItem('shand_result', JSON.stringify(sampleData));
+          localStorage.setItem('shand_result', JSON.stringify(resultData));
           
           // Show success message before redirect
-          showFeedback('Analysis complete! Redirecting to results...', 'info');
+          showFeedback('Analysis complete! Redirecting to results...', 'success');
           
           // Redirect after brief delay
           setTimeout(() => {
@@ -1079,7 +1062,7 @@
           
         } catch (error) {
           console.error('Analysis error:', error);
-          showFeedback('Analysis failed. Please try again.', 'error');
+          showFeedback('Analysis failed. Please try again. Make sure Ollama is running.', 'error');
           
           // Reset button
           analyzeBtn.innerHTML = `

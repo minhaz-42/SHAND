@@ -1,0 +1,162 @@
+<!-- 
+Optional Frontend Enhancement for LLM Integration
+Add this to index.html to enable users to choose between rule-based and LLM analysis
+-->
+
+<!-- Add this section after the main textarea and before the analyze button -->
+
+<div style="margin-top: 20px; padding: 15px; background: #f0f4f8; border-radius: 8px; border-left: 4px solid #3b82f6;">
+    <label style="display: flex; align-items: center; gap: 10px; cursor: pointer; font-size: 14px;">
+        <input type="checkbox" id="useLLMAnalysis" checked style="cursor: pointer; width: 18px; height: 18px;">
+        <span>
+            <strong>✨ Use AI-Enhanced Analysis</strong>
+            <span style="color: #666; font-size: 12px; display: block;">
+                (Slower but finds more assumptions • ~$0.003 cost)
+            </span>
+        </span>
+    </label>
+    
+    <div id="deepDiveOption" style="margin-top: 10px; padding-left: 28px;">
+        <label style="display: flex; align-items: center; gap: 10px; cursor: pointer; font-size: 13px;">
+            <input type="checkbox" id="useDeepDive" style="cursor: pointer; width: 16px; height: 16px;">
+            <span>
+                Include Deep Analysis
+                <span style="color: #666; font-size: 11px; display: block;">
+                    (Detailed reasoning for each assumption • ~$0.01 cost)
+                </span>
+            </span>
+        </label>
+    </div>
+</div>
+
+<!-- Add this JavaScript to handle the LLM analysis -->
+<script>
+// LLM Analysis Mode Toggle
+document.getElementById('useLLMAnalysis').addEventListener('change', function() {
+    document.getElementById('deepDiveOption').style.display = 
+        this.checked ? 'block' : 'none';
+});
+
+// Update the analyze button click handler to use LLM if selected
+const originalAnalyzeHandler = document.getElementById('analyzeButton').onclick;
+
+document.getElementById('analyzeButton').addEventListener('click', function(e) {
+    e.preventDefault();
+    
+    const text = document.getElementById('textInput').value.trim();
+    
+    // Validation (same as before)
+    if (!text) {
+        showError('Please enter some text to analyze.');
+        return;
+    }
+    
+    const words = text.split(/\s+/).length;
+    const maxWords = 5000;
+    
+    if (words > maxWords) {
+        showError(`Your text has ${words} words but the limit is ${maxWords}.`);
+        return;
+    }
+    
+    const useLLM = document.getElementById('useLLMAnalysis').checked;
+    const useDeepDive = document.getElementById('useDeepDive').checked && useLLM;
+    
+    // Choose endpoint based on user preference
+    let endpoint = '/analyze/';
+    let payload = { text };
+    
+    if (useDeepDive) {
+        endpoint = '/analyze-deepdive/';
+        // Request deep dive for assumptions with high risk or low confidence
+        payload.assumption_indices = [0, 1, 2]; // Adjust as needed
+    } else if (useLLM) {
+        endpoint = '/analyze-llm/';
+    }
+    
+    analyzeText(endpoint, payload);
+});
+
+function analyzeText(endpoint, payload) {
+    const resultDiv = document.getElementById('result');
+    resultDiv.innerHTML = '<div class="loading"><div class="spinner"></div><p>Analyzing assumptions...</p></div>';
+    
+    fetch(endpoint, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload)
+    })
+    .then(response => {
+        if (!response.ok) {
+            return response.json().then(err => {
+                throw new Error(err.detail || 'Analysis failed');
+            });
+        }
+        return response.json();
+    })
+    .then(data => {
+        // Store result and redirect
+        localStorage.setItem('shand_result', JSON.stringify(data));
+        localStorage.setItem('shand_analysis_type', data.analysis_type || 'rule-based');
+        window.location.href = 'analysis.html';
+    })
+    .catch(error => {
+        resultDiv.innerHTML = '';
+        if (error.message.includes('AI-Enhanced')) {
+            showError('AI-Enhanced analysis not available. Using rule-based instead.');
+            // Fallback to rule-based
+            analyzeText('/analyze/', { text: payload.text });
+        } else {
+            showError('Error: ' + error.message);
+        }
+    });
+}
+
+function showError(message) {
+    alert(message);
+}
+</script>
+
+<!-- Optional: Update analysis.html to show which mode was used -->
+<script>
+// In analysis.html, after displaying assumptions, add this:
+const analysisType = localStorage.getItem('shand_analysis_type');
+if (analysisType === 'llm_enhanced') {
+    // Show a badge or indicator
+    const banner = document.createElement('div');
+    banner.innerHTML = '✨ AI-Enhanced Analysis Results';
+    banner.style.cssText = 'background: #dbeafe; color: #1e40af; padding: 10px; border-radius: 5px; margin-bottom: 15px; text-align: center; font-weight: bold;';
+    document.body.insertBefore(banner, document.body.firstChild);
+}
+
+// Display executive summary if available
+const result = JSON.parse(localStorage.getItem('shand_result') || '{}');
+if (result.executive_summary) {
+    const summary = document.createElement('div');
+    summary.innerHTML = `
+        <div style="background: #f0fdf4; border-left: 4px solid #10b981; padding: 15px; margin-bottom: 20px; border-radius: 5px;">
+            <h3 style="margin-top: 0; color: #065f46;">📋 Executive Summary</h3>
+            <p style="margin-bottom: 0; color: #155e75;">${result.executive_summary}</p>
+        </div>
+    `;
+    document.body.insertBefore(summary, document.body.querySelector('.assumptions-container'));
+}
+</script>
+
+<!--
+USAGE:
+1. Copy this entire block
+2. Paste after the textarea in index.html (around line 200)
+3. Update the analyze button to use the new handler
+4. Test with API key set: export ANTHROPIC_API_KEY="your-key"
+5. Run: ./runserver.sh
+6. Toggle "Use AI-Enhanced Analysis" checkbox
+7. Click analyze and watch the magic happen!
+
+FEATURES:
+- Checkbox to toggle between rule-based and LLM-enhanced
+- Option to enable deep analysis for critical assumptions
+- Shows executive summary on results page
+- Gracefully falls back to rule-based if LLM unavailable
+- Cost/feature explanation for users
+-->
