@@ -1,5 +1,11 @@
 # SHAND — Structured Human Assumption & Narrative Detector
 
+## Recent Updates (2026)
+- **LLM Integration:** Local LLM (Ollama) and enhanced analysis endpoints added. See `views_llm_local.py`, `llm_local.py`, and `FRONTEND_LLM_INTEGRATION.html` for details.
+- **Hallucination Dashboard:** New dashboard and API endpoints for hallucination signal analysis. See `hallucination-dashboard.html` and `api_views.py`.
+- **Analysis History:** View all past analyses in `all-analysis.html`.
+- **Expanded API:** New endpoints for session stats, hallucination events, and model selection.
+
 ## Philosophy
 SHAND is a thinking tool, not a chatbot or landing page. It is designed for calm, readable, academic analysis of assumptions in text. The UI is minimal, neutral, and card-based. All logic is deterministic and explainable—no machine learning, no black boxes, no hallucinations.
 
@@ -38,12 +44,15 @@ SHAND analyzes text through a four-stage pipeline:
 ## Architecture
 
 ### Frontend
-- **`index.html`** — Input page with textarea, word counter, neutral button
+- **`index.html`** — Input page with textarea, word counter, LLM toggle, neutral button
 - **`landing.html`** — Landing page with hero section, features, research context
 - **`analysis.html`** — Results page with summary bar and vertically stacked assumption cards
 - **`assumption.html`** — Deep view of single assumption with full explanation and dependencies
 - **`about.html`** — Philosophy, methodology, and research relevance explanation
 - **`result.html`** — Redirect page shown during processing
+- **`all-analysis.html`** — View all past analyses
+- **`hallucination-dashboard.html`** — Visualize hallucination signals and model stats
+- **`FRONTEND_LLM_INTEGRATION.html`** — Optional UI for LLM mode selection
 
 All styling is inline; no external CSS frameworks. Uses system fonts and academic color palette.
 
@@ -53,12 +62,16 @@ All styling is inline; no external CSS frameworks. Uses system fonts and academi
 - **SQLite** — Optional persistence (MVP uses localStorage)
 
 #### Core Modules
-- **`assumption_detector.py`** (120 lines) — Sentence splitting and linguistic pattern matching
-- **`assumption_classifier.py`** (~40 lines) — Pattern-based type classification with confidence
-- **`risk_engine.py`** (~50 lines) — Deterministic risk assessment with explainable factors
-- **`graph_builder.py`** (~35 lines) — Token-overlap dependency detection
-- **`views.py`** (~75 lines) — API endpoint handling validation and orchestration
-- **`models.py`** — Placeholder for future persistence layer
+- **`assumption_detector.py`** — Sentence splitting and linguistic pattern matching
+- **`assumption_classifier.py`** — Pattern-based type classification with confidence
+- **`risk_engine.py`** — Deterministic risk assessment with explainable factors
+- **`graph_builder.py`** — Token-overlap dependency detection
+- **`views.py`** — API endpoint handling validation and orchestration
+- **`views_llm_local.py`** — LLM-based analysis endpoints (Ollama, local models)
+- **`llm_local.py`** — Local LLM inference and model management
+- **`api_views.py`** — Hallucination API endpoints and stats
+- **`db_utils.py`** — Claim and hallucination processing utilities
+- **`models.py`** — Analysis session, claim, and hallucination models
 
 ## Installation & Setup
 
@@ -104,26 +117,18 @@ All styling is inline; no external CSS frameworks. Uses system fonts and academi
 
 ## API Reference
 
-### POST /analyze/
 
-**Request:**
-```bash
-curl -X POST http://127.0.0.1:8000/analyze/ \
-  -H "Content-Type: application/json" \
-  -d '{"text": "Your text here..."}'
-```
+### Key API Endpoints
 
-**Success Response (200):**
-```json
-{
-  "assumptions": [...],
-  "graph": {...}
-}
-```
+- **POST /analyze/** — Rule-based analysis (input: `{ "text": "..." }`)
+- **POST /llm-local/** — Local LLM analysis (input: `{ "text": "...", "model": "mistral" }`)
+- **POST /llm/** — Enhanced LLM analysis (if enabled)
+- **GET /api/analyses/** — List all analysis sessions
+- **GET /api/analyses/{id}/summary/** — Get summary for a session
+- **GET /api/hallucinations/session/{id}/** — Get hallucination events for a session
+- **GET /api/hallucinations/stats/** — Get aggregate hallucination stats
 
-**Error Responses:**
-- **400** — Empty text, invalid JSON, or exceeds 800 words
-- **405** — Non-POST request
+See `backend/engine/urls.py` for full list.
 
 ## Example Workflow
 
@@ -222,34 +227,42 @@ curl -X POST http://127.0.0.1:8000/analyze/ \
 # 5. Click on assumption to view details
 ```
 
+
 ## Project Structure
 ```
 SHAND/
-├── README.md                          (this file)
+├── README.md
 ├── frontend/
-│   ├── index.html                     (input page)
-│   ├── landing.html                   (landing/marketing page)
-│   ├── analysis.html                  (results page)
-│   ├── assumption.html                (detail view)
-│   ├── about.html                     (about/methodology)
-│   └── result.html                    (redirect page)
+│   ├── index.html
+│   ├── landing.html
+│   ├── analysis.html
+│   ├── assumption.html
+│   ├── about.html
+│   ├── result.html
+│   ├── all-analysis.html
+│   ├── hallucination-dashboard.html
+│   └── FRONTEND_LLM_INTEGRATION.html
 └── backend/
-    ├── manage.py                      (Django CLI)
-    ├── db.sqlite3                     (optional persistence)
-    ├── shand/
-    │   ├── settings.py                (Django configuration)
-    │   ├── urls.py                    (URL routing)
-    │   └── wsgi.py                    (WSGI application)
-    └── engine/
-        ├── __init__.py
-        ├── models.py                  (placeholder models)
-        ├── views.py                   (API endpoint)
-        ├── urls.py                    (app routing)
-        ├── assumption_detector.py     (detector engine)
-        ├── assumption_classifier.py   (classifier engine)
-        ├── risk_engine.py             (risk assessment)
-        ├── graph_builder.py           (dependency graph)
-        └── migrations/                (Django migrations)
+  ├── manage.py
+  ├── db.sqlite3
+  ├── shand/
+  │   ├── settings.py
+  │   ├── urls.py
+  │   └── wsgi.py
+  └── engine/
+    ├── __init__.py
+    ├── models.py
+    ├── views.py
+    ├── views_llm_local.py
+    ├── llm_local.py
+    ├── api_views.py
+    ├── db_utils.py
+    ├── urls.py
+    ├── assumption_detector.py
+    ├── assumption_classifier.py
+    ├── risk_engine.py
+    ├── graph_builder.py
+    └── migrations/
 ```
 
 ## Status & Maintenance
